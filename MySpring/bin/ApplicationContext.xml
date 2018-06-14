@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans>
+
+	<bean name="User" class="com.myspring.bean.UserImpl">
+		<property name="name" value="zhrt" />
+	</bean>
+	<bean name="Student" class="com.myspring.bean.Student">
+		<property name="name" value="zhrt" />
+		<property name="age" value="21" />
+	</bean>
+
+
+	<bean name="beforeAdvice" class="com.myspring.bean.MyBeforeAdvice" />
+	<bean name="afterAdvice" class="com.myspring.bean.MyAfterAdvice" />
+	<bean name="throwsAdvice" class="com.myspring.bean.MyThrowsAdvice" />
+	<bean name="aroundAdvice" class="com.myspring.bean.MyAroundAdvice" />
+
+	<bean name="UserProxy" class="com.myspring.aop.ProxyFactoryBean">
+		<property name="target" ref="User" />
+		<property name="proxyInterface" value="com.myspring.bean.User" />
+		<property name="interceptorName">
+			<list>
+				<value>beforeAdvice</value>
+				<value>afterAdvice</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean name="StudentProxy" class="com.myspring.aop.ProxyFactoryBean">
+		<property name="target" ref="Student" />
+		<property name="interceptorName">
+			<list>
+				<value>beforeAdvice</value>
+				<value>throwsAdvice</value>
+				<value>aroundAdvice</value>
+			</list>
+		</property>
+	</bean>
+
+</beans>
