@@ -4,11 +4,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.myspring.aop.ProxyFactoryBean;
+import com.myspring.aop.advice.MethodInterceptor;
+import com.myspring.aop.factory.ProxyFactoryBean;
 import com.myspring.bean.Student;
 import com.myspring.config.Bean;
 import com.myspring.config.Bean.ScopeType;
 import com.myspring.config.ConfigurationManager;
+import com.myspring.config.Interceptor;
 import com.myspring.config.Property;
 import com.myspring.util.BeanUtil;
 
@@ -106,7 +108,21 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
 			// 为对象的属性注入值
 			Method[] methods = clazz.getMethods();
 			for (Property pro : bean.getProperties()) {
-				if (pro.getValue() != null) {
+				if (beanObj instanceof ProxyFactoryBean && pro.getName().equals("interceptorName")) {
+					// 拦截器
+					Interceptor ref = new Interceptor();
+					MethodInterceptor interceptor = (MethodInterceptor) this.getRef(pro.getRef());
+					String check = pro.getValue();
+					ref.setInterceptor(interceptor);
+					ref.setCheck(check);
+					ref.setName(pro.getRef());
+					for (Method method : methods) {
+						if (method.getName().equalsIgnoreCase("set" + pro.getName())) {
+							BeanUtil.populate(method, beanObj, ref);
+							break;
+						}
+					}
+				} else if (pro.getValue() != null) {
 					// 非依赖关系属性
 					for (Method method : methods) {
 						if (method.getName().equalsIgnoreCase("set" + pro.getName())) {
@@ -130,6 +146,8 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
 				// 获取代理对象工厂
 				ProxyFactoryBean proxyFactory = (ProxyFactoryBean) beanObj;
 				beanObj = proxyFactory.createProxy();
+				earlySingletonObjects.remove(bean);
+				singletonObjects.put(bean, beanObj);
 			}
 
 		} catch (Exception e) {
@@ -149,8 +167,11 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
 	public Object getBean(String beanName) {
 		Bean bean = beans.get(beanName);
 		if (bean.getScope() == ScopeType.singleton) {
-			if (bean.getClassName().equals("com.myspring.aop.ProxyFactoryBean"))
+			if (bean.getClassName().equals("com.myspring.aop.ProxyFactoryBean")) {
+				if (singletonObjects.get(bean) != null)
+					return singletonObjects.get(bean);
 				return createBean(bean);
+			}
 			return singletonObjects.get(bean);
 		} else {
 			Object obj = createBean(bean);

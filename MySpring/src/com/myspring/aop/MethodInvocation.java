@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import com.myspring.aop.advice.MethodInterceptor;
+import com.myspring.config.Interceptor;
 
 public class MethodInvocation {
 	private List<Object> chain;
@@ -44,11 +45,32 @@ public class MethodInvocation {
 		this.target = target;
 	}
 
+	boolean methodCheck(Interceptor interceptor) {
+		// 检查是否有正则表达式
+		if (interceptor.getCheck() == null) {
+			// 检查是否有注解
+			if (method.isAnnotationPresent(AdviceAnnotation.class) == false)
+				return true;
+			AdviceAnnotation[] annotations = (AdviceAnnotation[]) method.getAnnotations();
+			for (AdviceAnnotation annotation : annotations) {
+				if (annotation.check().matches(interceptor.getName()))
+					return true;
+			}
+			return false;
+		}
+		// 有正则表达式则直接用正则表达式匹配
+		return method.getName().matches(interceptor.getCheck());
+	}
+
 	public Object proceed() throws Throwable {
 		if (chainIndex == chain.size() - 1) {
 			return method.invoke(target, args);
 		}
-		Object interceptor = chain.get(++chainIndex);
-		return ((MethodInterceptor) interceptor).invoke(this);
+		Interceptor interceptor = (Interceptor) chain.get(++chainIndex);
+		// 检查是否调用拦截器
+		if (methodCheck(interceptor))
+			return ((MethodInterceptor) interceptor.getInterceptor()).invoke(this);
+		else
+			return proceed();
 	}
 }

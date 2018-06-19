@@ -1,5 +1,7 @@
 package com.myspring.bean;
 
+import com.myspring.aop.AdviceAnnotation;
+
 public class Student {
 	private String name;
 	private Integer age;
@@ -20,6 +22,8 @@ public class Student {
 		this.age = age;
 	}
 
+	@AdviceAnnotation(check = "beforeAdvice")
+	@AdviceAnnotation(check = "aroundAdvice")
 	public void doHello() {
 		System.out.println("I'm " + name + " " + age + " years old!");
 	}

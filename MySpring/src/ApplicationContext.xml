@@ -9,16 +9,22 @@
 		<property name="name" value="zhrt" />
 		<property name="age" value="21" />
 	</bean>
-
+	<bean name="A" class="com.myspring.bean.A">
+		<property name="name" value="I'm A" />
+		<property name="refB" ref="B" />
+	</bean>
+	<bean name="B" class="com.myspring.bean.B">
+		<property name="name" value="I'm B" />
+		<property name="refA" ref="A" />
+	</bean>
 
 	<bean name="beforeAdvice" class="com.myspring.bean.MyBeforeAdvice" />
 	<bean name="afterAdvice" class="com.myspring.bean.MyAfterAdvice" />
 	<bean name="throwsAdvice" class="com.myspring.bean.MyThrowsAdvice" />
 	<bean name="aroundAdvice" class="com.myspring.bean.MyAroundAdvice" />
 
-	<bean name="UserProxy" class="com.myspring.aop.ProxyFactoryBean">
+	<bean name="UserProxy" class="com.myspring.aop.factory.ProxyFactoryBean">
 		<property name="target" ref="User" />
-		<property name="proxyInterface" value="com.myspring.bean.User" />
 		<property name="interceptorName">
 			<list>
 				<value>beforeAdvice</value>
@@ -27,13 +33,14 @@
 		</property>
 	</bean>
 
-	<bean name="StudentProxy" class="com.myspring.aop.ProxyFactoryBean">
+	<bean name="StudentProxy" class="com.myspring.aop.factory.ProxyFactoryBean">
 		<property name="target" ref="Student" />
 		<property name="interceptorName">
 			<list>
-				<value>beforeAdvice</value>
+				<value check="doThrow">beforeAdvice</value>
 				<value>throwsAdvice</value>
 				<value>aroundAdvice</value>
+				<value>beforeAdvice</value>
 			</list>
 		</property>
 	</bean>

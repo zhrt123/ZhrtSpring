@@ -1,8 +1,10 @@
-package com.myspring.aop;
+package com.myspring.aop.factory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.myspring.aop.MethodInvocation;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -22,9 +24,12 @@ public class CGlibProxyFactory implements MethodInterceptor {
 		return m.proceed();
 	}
 
+	// 获取一个CGlib代理对象
 	public Object getProxy() {
 		Enhancer enhancer = new Enhancer();
+		// 设置父类
 		enhancer.setSuperclass(target.getClass());
+		// 设置回调函数
 		enhancer.setCallback(this);
 		return enhancer.create();
 	}

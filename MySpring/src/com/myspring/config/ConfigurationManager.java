@@ -66,6 +66,7 @@ public class ConfigurationManager {
 							for (Element interceptorName : interceptorNames) {
 								Property p = new Property();
 								p.setName("interceptorName");
+								p.setValue(interceptorName.getAttributeValue("check"));
 								p.setRef(interceptorName.getText());
 								properties.add(p);
 							}
